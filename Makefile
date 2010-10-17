@@ -1,6 +1,6 @@
 # Hey Emacs, this is a -*- makefile -*-
 #----------------------------------------------------------------------------
-# WinAVR Makefile Template written by Eric B. Weddington, Jörg Wunsch, et al.
+# WinAVR Makefile Template written by Eric B. Weddington, Jï¿½rg Wunsch, et al.
 #  >> Modified for use with the LUFA project. <<
 #
 # Released to the Public Domain
@@ -62,14 +62,14 @@
 FIRMWARE_VERSION = 3_41
 
 # MCU name
-#MCU = at90usb1287
+#MCU = atmega1280
+MCU = atmega328p
 
-
-# Target board (see library "Board Types" documentation, NONE for projects not requiring
-# LUFA board drivers). If USER is selected, put custom board drivers in a directory called 
-# "Board" inside the application directory.
-#BOARD  = USBKEY
-
+# Corresponds to a particular directory in the Boards subfolder.
+#BOARD  = ArduinoMega
+BOARD  = ArduinoDuemilanove
+# Due to some silly timing issues. This currently needs to stay at 1
+DEBUG_LEVEL = 1
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the 
@@ -82,81 +82,7 @@ FIRMWARE_VERSION = 3_41
 #     does not *change* the processor frequency - it should merely be updated to
 #     reflect the processor speed set externally so that the code can use accurate
 #     software delays.
-#F_CPU = 8000000
-
-## *** Select your board *** ##
-
-## Teensy 1.0
-#MCU = at90usb162
-#BOARD = TEENSY
-#F_CPU = 16000000
-
-## Teensy++ 1.0
-#MCU = at90usb646
-#BOARD = TEENSY
-#F_CPU = 16000000
-
-## Teensy 2.0
-#MCU = atmega32u4
-#BOARD = TEENSY
-#F_CPU = 16000000
-
-# Teensy++ 2.0
-#MCU = at90usb1286
-#BOARD  = TEENSY
-#F_CPU = 16000000
-
-## AT90USBKEY / AT90USBKEY2
-#MCU = at90usb1287
-#BOARD = USBKEY
-#F_CPU = 8000000
-
-## Minimus v1
-#MCU = at90usb162
-#BOARD = MINUMUS
-#F_CPU = 16000000
-
-## Minimus 32
-## It actually is atmega32u2 but at90usb162 is compatible and
-## the latest avr-gcc doesn't compile for atmega32u2
-#MCU = at90usb162
-#BOARD = MINIMUS
-#F_CPU = 16000000
-
-## Maximus
-#MCU = at90usb162
-#BOARD = MAXIMUS
-#F_CPU = 16000000
-
-## Blackcat
-#MCU = at90usb162
-#BOARD = BLACKCAT
-#F_CPU = 16000000
-
-## Xplain
-#MCU = at90usb1287
-#BOARD = XPLAIN
-#F_CPU = 8000000
-
-## Olimex
-#MCU = at90usb162
-#BOARD = OLIMEX
-#F_CPU = 8000000
-
-## USBTINYMKII
-#MCU = at90usb162
-#BOARD = USBTINYMKII
-#F_CPU = 16000000
-
-## Benito
-#MCU = at90usb162
-#BOARD = BENITO
-#F_CPU = 16000000
-
-## OpenKubus
-#MCU = atmega16u4
-#BOARD = USBKEY
-#F_CPU = 8000000
+F_CPU = 16000000
 
 
 # Input clock frequency.
@@ -186,27 +112,8 @@ TARGET = psgroove
 #     this an empty or blank macro!
 OBJDIR = .
 
-
-
-# Path to the LUFA library
-LUFA_PATH = lufa-lib/trunk
-
-
-# LUFA library compile-time options and predefined tokens
-LUFA_OPTS  = -D USB_DEVICE_ONLY
-LUFA_OPTS += -D FIXED_CONTROL_ENDPOINT_SIZE=8
-LUFA_OPTS += -D USE_FLASH_DESCRIPTORS
-LUFA_OPTS += -D MEMSPACE_FLASH=0
-LUFA_OPTS += -D MEMSPACE_EEPROM=1
-LUFA_OPTS += -D USE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)"
-
-
-# Create the LUFA source path variables by including the LUFA root makefile
-include $(LUFA_PATH)/LUFA/makefile
-
-
 # List C source files here. (C dependencies are automatically generated.)
-SRC = psgroove.c $(LUFA_SRC_USB)
+SRC = psgroove.c usb_utils.c usbdrv/usbdrv.c usbdrv/oddebug.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -220,7 +127,7 @@ CPPSRC =
 #     Even though the DOS/Win* filesystem matches both .s and .S the same,
 #     it will preserve the spelling of the filenames, and gcc itself does
 #     care about how the name is spelled on its command-line.
-ASRC =
+ASRC = usbdrv/usbdrvasm.S
 
 
 # Optimization level, can be [0, 1, 2, 3, s]. 
@@ -240,7 +147,7 @@ DEBUG = dwarf-2
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRAINCDIRS = $(LUFA_PATH)/
+EXTRAINCDIRS = usbdrv/ Boards/${BOARD}
 
 
 # Compiler flag to set the C Standard level.
@@ -256,20 +163,18 @@ CDEFS  = -DF_CPU=$(F_CPU)UL
 CDEFS += -DF_CLOCK=$(F_CLOCK)UL
 CDEFS += -DBOARD=BOARD_$(BOARD)
 CDEFS += -DFIRMWARE_$(FIRMWARE_VERSION)
-CDEFS += $(LUFA_OPTS)
+CDEFS += -DDEBUG_LEVEL=${DEBUG_LEVEL}
 
 
 # Place -D or -U options here for ASM sources
 ADEFS  = -DF_CPU=$(F_CPU)
 ADEFS += -DF_CLOCK=$(F_CLOCK)UL
 ADEFS += -DBOARD=BOARD_$(BOARD)
-ADEFS += $(LUFA_OPTS)
 
 # Place -D or -U options here for C++ sources
 CPPDEFS  = -DF_CPU=$(F_CPU)UL
 CPPDEFS += -DF_CLOCK=$(F_CLOCK)UL
 CPPDEFS += -DBOARD=BOARD_$(BOARD)
-CPPDEFS += $(LUFA_OPTS)
 #CPPDEFS += -D__STDC_LIMIT_MACROS
 #CPPDEFS += -D__STDC_CONSTANT_MACROS
 
@@ -340,8 +245,7 @@ CPPFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 #             files -- see avr-libc docs [FIXME: not yet described there]
 #  -listing-cont-lines: Sets the maximum number of continuation lines of hex 
 #       dump that will be displayed for a given single line of source input.
-ASFLAGS = $(ADEFS) -Wa,-adhlns=$(<:%.S=$(OBJDIR)/%.lst),-gstabs,--listing-cont-lines=100
-
+ASFLAGS = $(ADEFS) -Wa,-adhlns=$(<:%.S=$(OBJDIR)/%.lst),-gstabs,--listing-cont-lines=100 $(patsubst %,-I%,$(EXTRAINCDIRS))
 
 #---------------- Library Options ----------------
 # Minimalistic printf version
@@ -402,7 +306,7 @@ LDFLAGS += -Wl,--relax
 LDFLAGS += -Wl,--gc-sections
 LDFLAGS += $(EXTMEMOPTS)
 LDFLAGS += $(patsubst %,-L%,$(EXTRALIBDIRS))
-LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
+#LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 #LDFLAGS += -T linker_script.x
 
 
@@ -413,10 +317,11 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Type: avrdude -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = jtagmkII
+AVRDUDE_PROGRAMMER = stk500v1 -b 57600
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = usb
+#AVRDUDE_PORT = /dev/tty.usbserial-A6008hgx
+AVRDUDE_PORT = /dev/ttyUSB*
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
@@ -538,7 +443,8 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 all: begin gccversion sizebefore build sizeafter end
 
 # Change the build target to build a HEX file or a library.
-build: elf hex eep lss sym
+#build: elf hex eep lss sym
+build: hex
 #build: lib
 
 
